@@ -15,7 +15,7 @@ void main() {
 	cout << "\n¬ведите количество узлов: \n";
 	cin >> n;
 	h = (right_boarder - left_boarder) / n;
-	result = differenceScheme(left_boarder, h, n, mu1, mu2, breaking_point, is_test_task);
+	result = differenceScheme(h, n, mu1, mu2, breaking_point, is_test_task);
 	if (is_test_task) {
 		cout << "i   xi   vi      ui      vi-ui\n";
 	}
