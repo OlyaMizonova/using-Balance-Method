@@ -1,5 +1,16 @@
 #include"NamesOfFunctions.h"
 
+pair<double, double> max(vector <vector <double>> v) {
+	pair<double, double> Max(0.0, 0.0);
+	for (int i = 0; i < size(v); i++) {
+		if (Max.first < v[i][3]) {
+			Max.first = v[i][3];
+			Max.second = v[i][0];
+		}
+	}
+	return Max;
+}
+
 double u_for_test(double x) {
 	if (x < 0.25) {
 		return 0.587442041369270784325 * exp(sqrt(2) * x) - 1.587442041369270784325 * exp(-sqrt(2) * x)+1;
@@ -101,13 +112,13 @@ double B_i(int i, double h, double breaking_point, int is_test_task) {
 
 double C_i(int i, double h, double breaking_point, int is_test_task) {
 	double ai = a_i(h, breaking_point, (i - 0.5) * h, (i - 1) * h, i * h, is_test_task);
+	double di = d_i(h, breaking_point, (i - 0.5) * h, (i + 0.5) * h, i * h, is_test_task);
 	int new_i = i + 1;
 	double ai_plus_1 = a_i(h, breaking_point, (new_i - 0.5) * h, (new_i - 1) * h, new_i * h, is_test_task);
-	double di = d_i(h, breaking_point, (i - 0.5) * h, (i + 0.5) * h, i * h, is_test_task);
 	return ((1 / pow(h, 2)) * (ai + ai_plus_1) + di);
 }
 
-vector<double> sweepMethod(double h, double n, double mu1, double mu2, double breaking_point, int is_test_task) {
+vector<double> sweepMethod(double h, int n, double mu1, double mu2, double breaking_point, int is_test_task) {
 	vector<double> result(n+1); // вектор для записи результата
 	result[0]=mu1; // левое граничное условие
 	result[n] = mu2; //правое граничное условие
@@ -132,7 +143,7 @@ vector<double> sweepMethod(double h, double n, double mu1, double mu2, double br
 	return result;
 }
 
-vector<vector<double>> differenceScheme(double h, double n, double mu1, double mu2, double breaking_point, int is_test_task) {
+vector<vector<double>> differenceScheme(double h, int n, double mu1, double mu2, double breaking_point, int is_test_task) {
 	vector<vector<double>> result; //итоговая "таблица"
 	vector<double> v_with_usual_h = sweepMethod( h, n, mu1, mu2, breaking_point, is_test_task); //решение разностной схемы с обычным шагом
 	if (!is_test_task) {
@@ -140,6 +151,7 @@ vector<vector<double>> differenceScheme(double h, double n, double mu1, double m
 																								//решение разностной схемы с половинным шагом
 		vector<double>v_minus_v_half_h(n + 1); // модуль разности решений разностной схемы с обычным шагом и с половинным шагом
 		for (int i = 0; i < n + 1; i++) {
+			cout << "x[i]h = " << v_with_usual_h[i] << " x[i]2h = " << v_with_half_h[i] << '\n';
 			v_minus_v_half_h[i] = abs(v_with_usual_h[i] - v_with_half_h[2*i]);
 			result.push_back({ i * h,v_with_usual_h[i],v_with_half_h[2 * i],v_minus_v_half_h[i] });
 		}
