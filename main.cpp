@@ -3,7 +3,8 @@
 void main() {
 	setlocale(LC_ALL, "RUS");
 	double left_boarder = 0, right_boarder = 1;
-	double h, n;
+	double h;
+	int n;
 	double breaking_point=0.25, mu1=0,mu2=1;
 	vector<vector<double>> result;
 	int is_test_task = 0;
@@ -14,7 +15,7 @@ void main() {
 	is_test_task = (1-is_test_task);
 	cout << "\n¬ведите количество узлов: \n";
 	cin >> n;
-	h = (right_boarder - left_boarder) / n;
+	h = 1. / n;
 	result = differenceScheme(h, n, mu1, mu2, breaking_point, is_test_task);
 	if (is_test_task) {
 		cout << "i   xi   vi      ui      vi-ui\n";
@@ -29,4 +30,6 @@ void main() {
 		}
 		cout << "\n";
 	}
+	pair<double, double> epsilon = max(result);
+	cout << " epsilon = " << epsilon.first << "; x = " << epsilon.second << "\n";
 }
