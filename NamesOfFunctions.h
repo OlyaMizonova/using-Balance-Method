@@ -2,11 +2,11 @@
 #include<vector>
 #include <functional>
 #include<iostream>
+#include<cmath>
 using namespace std;
 
-pair<double, double> max(vector <vector <double>> v);
 
-vector<vector<double>> differenceScheme(double h, int n, double mu1, double mu2, double breaking_point, int is_test_task);
+vector<vector<double>> differenceScheme(int n, double mu1, double mu2, double breaking_point, int is_test_task, double *maxDifference, double* maxDiffX);
 /* 
 на вход подаются следующие параметры:
 double h - шаг, расстояние между узлами сетки
@@ -25,7 +25,7 @@ double u_for_test(double x);
 /* 
 возвращает аналитическое решение тестовой задачи в точке х
 */
-vector<double> sweepMethod(double h, int n, double mu1, double mu2, double breaking_point, int is_test_task);
+vector<double> sweepMethod(int n, double mu1, double mu2, double breaking_point, int is_test_task);
 /* 
 на вход подаются следующие параметры:
 double h - шаг, расстояние между узлами сетки

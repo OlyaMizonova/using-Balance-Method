@@ -1,16 +1,5 @@
 #include"NamesOfFunctions.h"
 
-pair<double, double> max(vector <vector <double>> v) {
-	pair<double, double> Max(0.0, 0.0);
-	for (int i = 0; i < size(v); i++) {
-		if (Max.first < v[i][3]) {
-			Max.first = v[i][3];
-			Max.second = v[i][0];
-		}
-	}
-	return Max;
-}
-
 double u_for_test(double x) {
 	if (x < 0.25) {
 		return 0.587442041369270784325 * exp(sqrt(2) * x) - 1.587442041369270784325 * exp(-sqrt(2) * x)+1;
@@ -37,10 +26,13 @@ double d_i(double h, double breaking_point, double x_i_minus_05, double x_i_plus
 			return 1.;
 		}
 		if (x_i_minus_05 >= breaking_point) { // отрезок правее точки разрыва 
-			return pow(x_i, 2);
+			return (1/6.)*(pow(x_i_minus_05,2)+4*pow(x_i,2)+pow(x_i_plus_05,2));
 		}
 		if (x_i_minus_05 <= breaking_point && x_i_plus_05 >= breaking_point) { // точка разрыва принадлежит отрезку
-			return (1 / h) * (breaking_point - x_i_minus_05) + (1 / h) * pow(((breaking_point + x_i_plus_05) / 2), 2) * (x_i_plus_05 - breaking_point);
+			return (1 / h) * ((breaking_point - x_i_minus_05) + 
+				((x_i_plus_05-breaking_point)/6.)* 
+				(4*pow(((breaking_point + x_i_plus_05) / 2), 2) +
+				pow(x_i_plus_05,2)+pow(breaking_point,2)));
 		}
 	}
 }
@@ -59,14 +51,19 @@ double a_i(double h, double breaking_point, double x_i_minus_05, double x_i_minu
 	}
 	else { // основная задача
 		if (x_i <= breaking_point) { // отрезок левее точки разрыва
-			return sqrt(x_i_minus_05);
+			double to_turn = 0;
+			if (x_i_minus_1!=0) {
+				to_turn = pow((1. / 6.) * (1. / sqrt(x_i_minus_1) + 4. / sqrt(x_i_minus_05) + 1. / sqrt(x_i)),-1);
+			}
+			return to_turn;
 		}
 		if (x_i_minus_1 >= breaking_point) { // отрезок правее точки разрыва 
-			return x_i_minus_05 + 1;
+			double turn = (1. / 6.) * (1. / (x_i_minus_1 + 1) + 4. / (x_i_minus_05 + 1.) + 1. / x_i);
+			return pow(turn, -1);
 		}
 		if (x_i_minus_1 <= breaking_point && breaking_point <= x_i) { // точка разрыва принадлежит отрезку
-			double first = (breaking_point - x_i_minus_1) / (sqrt((breaking_point + x_i_minus_1) / 2)); // просто по-отдельности считаю слагаемые
-			double second = (x_i - breaking_point) / (((breaking_point + x_i) / 2) + 1);
+			double first = ((breaking_point-x_i_minus_1)/6.)*(1./sqrt(x_i_minus_1)+4./sqrt((x_i_minus_05+breaking_point)/2.)+1./sqrt(breaking_point)); // просто по-отдельности считаю слагаемые
+			double second = ((x_i - breaking_point) / 6.)*(1/(x_i+1.)+4/((x_i+breaking_point)/2.+1.)+1/breaking_point);
 			return pow(((1 / h) * (first + second)), -1);
 		}
 	}
@@ -75,7 +72,7 @@ double a_i(double h, double breaking_point, double x_i_minus_05, double x_i_minu
 double fi_i(double h, double breaking_point, double x_i_minus_05, double x_i_plus_05, double x_i, int is_test_task) {
 	if (is_test_task) { // тестовая задача
 		if (x_i_plus_05 <= breaking_point) { // отрезок левее точки разрыва
-			return 1;
+			return 1.;
 		}
 		if (x_i_minus_05 >= breaking_point) { // отрезок правее точки разрыва 
 			return 2.5;
@@ -86,14 +83,14 @@ double fi_i(double h, double breaking_point, double x_i_minus_05, double x_i_plu
 	}
 	else { // основная задача
 		if (x_i_plus_05 <= breaking_point) { // отрезок левее точки разрыва
-			return 1;
+			return 1.;
 		}
 		if (x_i_minus_05 >= breaking_point) { // отрезок правее точки разрыва 
-			return sqrt(x_i) + 2;
+			return (1./6.)*(sqrt(x_i_minus_05)+2.+4.*sqrt(x_i)+8+2+sqrt(x_i_plus_05));
 		}
 		if (x_i_minus_05 <= breaking_point && breaking_point <= x_i_plus_05) { // точка разрыва принадлежит отрезку
 			double first = (1 / h) * (breaking_point - x_i_minus_05); // просто по-отдельности считаю слагаемые
-			double second = (1 / h) * (sqrt((breaking_point + x_i_plus_05) / 2) + 2) * (x_i_plus_05 - breaking_point);
+			double second = (1 / h) * ((x_i_plus_05-breaking_point)/6.)*((4*sqrt((breaking_point + x_i_plus_05) / 2)) + sqrt(x_i_plus_05)+2+8+2+sqrt(breaking_point));
 			return first + second;
 		}
 	}
@@ -118,13 +115,14 @@ double C_i(int i, double h, double breaking_point, int is_test_task) {
 	return ((1 / pow(h, 2)) * (ai + ai_plus_1) + di);
 }
 
-vector<double> sweepMethod(double h, int n, double mu1, double mu2, double breaking_point, int is_test_task) {
+vector<double> sweepMethod(int n, double mu1, double mu2, double breaking_point, int is_test_task) {
 	vector<double> result(n+1); // вектор для записи результата
 	result[0]=mu1; // левое граничное условие
 	result[n] = mu2; //правое граничное условие
 	vector<double> alpha(n), beta(n); //векторы для хранения коэффициентов альфа и бета
 	alpha[0] = 0;
 	beta[0] = 0;
+	double h = 1. / n;
 
 	//прямой ход прогонки
 	for (int i = 1; i < n; i++) {//у альфа и бета индексы сдвинуты на 1
@@ -143,16 +141,22 @@ vector<double> sweepMethod(double h, int n, double mu1, double mu2, double break
 	return result;
 }
 
-vector<vector<double>> differenceScheme(double h, int n, double mu1, double mu2, double breaking_point, int is_test_task) {
+vector<vector<double>> differenceScheme(int n, double mu1, double mu2, double breaking_point, int is_test_task, double*maxDifference, double *maxDiffX) {
 	vector<vector<double>> result; //итоговая "таблица"
-	vector<double> v_with_usual_h = sweepMethod( h, n, mu1, mu2, breaking_point, is_test_task); //решение разностной схемы с обычным шагом
+	double h = 1. / n;
+	*maxDifference = 0;
+
+	vector<double> v_with_usual_h = sweepMethod( n, mu1, mu2, breaking_point, is_test_task); //решение разностной схемы с обычным шагом
 	if (!is_test_task) {
-		vector<double> v_with_half_h = sweepMethod(h / 2, n * 2, mu1, mu2, breaking_point, is_test_task); 
+		vector<double> v_with_half_h = sweepMethod( n * 2, mu1, mu2, breaking_point, is_test_task); 
 																								//решение разностной схемы с половинным шагом
 		vector<double>v_minus_v_half_h(n + 1); // модуль разности решений разностной схемы с обычным шагом и с половинным шагом
 		for (int i = 0; i < n + 1; i++) {
-			cout << "x[i]h = " << v_with_usual_h[i] << " x[i]2h = " << v_with_half_h[i] << '\n';
 			v_minus_v_half_h[i] = abs(v_with_usual_h[i] - v_with_half_h[2*i]);
+			if (v_minus_v_half_h[i] > *maxDifference) {
+				*maxDifference = v_minus_v_half_h[i];
+				*maxDiffX = i * h;
+			}
 			result.push_back({ i * h,v_with_usual_h[i],v_with_half_h[2 * i],v_minus_v_half_h[i] });
 		}
 	}
@@ -163,6 +167,10 @@ vector<vector<double>> differenceScheme(double h, int n, double mu1, double mu2,
 			double xi = i * h;
 			u_x[i] = u_for_test(xi);
 			u_x_minus_v[i] = abs(u_x[i] - v_with_usual_h[i]);
+			if (u_x_minus_v[i] > *maxDifference) {
+				*maxDifference = u_x_minus_v[i];
+				*maxDiffX = i * h;
+			}
 			result.push_back({ i * h,v_with_usual_h[i],u_x[i],u_x_minus_v[i] });
 		}
 	}
