@@ -1,3 +1,3 @@
 ﻿  main.cpp
-D:\study\forcpp\informatics\yaziki_i_metodi\git_labs\theSecondLab\main.cpp(3,13): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
-  theSecondLab.vcxproj -> D:\study\forcpp\informatics\yaziki_i_metodi\git_labs\theSecondLab\x64\Debug\theSecondLab.exe
+D:\study\chisl\theSecondLab\main.cpp(3,13): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
+  theSecondLab.vcxproj -> D:\study\chisl\theSecondLab\x64\Debug\theSecondLab.exe
